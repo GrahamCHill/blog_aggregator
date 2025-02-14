@@ -2,11 +2,12 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 )
 
-const DbName = "gatorconfig.json"
+const DbName = "/.gatorconfig.json"
 
 type Config struct {
 	DbUrl  string `json:"db_url"`
@@ -14,51 +15,43 @@ type Config struct {
 }
 
 func Read() (*Config, error) {
-	dbPath, err := getConfigFilePath()
-	if err != nil {
-		return nil, err
+	// Example: Read from a JSON file or environment variables
+	cfg := &Config{
+		DbUrl: "postgres://grahamhill:@localhost:5432/gator?sslmode=disable",
 	}
-	data, err := os.ReadFile(dbPath)
-	if err != nil {
-		return nil, err
-	}
-
-	var config Config
-	err = json.Unmarshal(data, &config)
-	if err != nil {
-		return nil, err
-	}
-	return &config, nil
+	return cfg, nil
 }
 
 func getConfigFilePath() (string, error) {
-	currentDir, err := os.Getwd()
+	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
 	}
-
-	// Navigate to the parent directory
-	parentDir := filepath.Dir(currentDir)
-
-	// Construct the full path to the config file
-	return filepath.Join(parentDir, DbName), nil
+	return filepath.Join(homeDir, DbName), nil
 }
 
 func (c *Config) SetUser(userName string) error {
 	c.DbUser = userName
-	return write(*c)
+	return Write(c)
 }
 
-func write(c Config) error {
-	filePath, err := getConfigFilePath()
+func Write(c *Config) error {
+	// Get the path to the config file
+	configPath, err := getConfigFilePath()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get config path: %w", err)
 	}
 
+	// Convert the config to JSON
 	data, err := json.MarshalIndent(c, "", "  ")
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to marshal config: %w", err)
 	}
 
-	return os.WriteFile(filePath, data, 0644)
+	// Write the config file
+	if err := os.WriteFile(configPath, data, 0644); err != nil {
+		return fmt.Errorf("failed to write config file: %w", err)
+	}
+
+	return nil
 }
