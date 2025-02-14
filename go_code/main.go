@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/grahamchill/blog_aggregator/internal"
 	"github.com/grahamchill/blog_aggregator/internal/config"
+	"os"
 )
 
 func main() {
@@ -12,21 +14,28 @@ func main() {
 		fmt.Printf("Error reading config: %v\n", err)
 		return
 	}
+	state := &internal.State{Cfg: cfg}
 
-	// Set the current user to your name (e.g., "lane")
-	err = cfg.SetUser("Graham")
-	if err != nil {
-		fmt.Printf("Error setting user: %v\n", err)
-		return
+	cmds := &internal.Commands{
+		Handlers: make(map[string]func(*internal.State, internal.Command) error),
 	}
 
-	// Read the config file again
-	updatedCfg, err := config.Read()
-	if err != nil {
-		fmt.Printf("Error reading updated config: %v\n", err)
-		return
+	cmds.Register("login", internal.HandlerLogin)
+
+	if len(os.Args) < 2 {
+		fmt.Printf("Error: Not enough arguments provided")
 	}
 
-	// Print the contents of the config struct
-	fmt.Printf("Updated Config: %+v\n", updatedCfg)
+	cmdName := os.Args[1]
+	cmdArgs := os.Args[2:]
+
+	cmd := internal.Command{
+		Name: cmdName,
+		Args: cmdArgs,
+	}
+
+	if err := cmds.Run(state, cmd); err != nil {
+		fmt.Printf("Error: %v\n", err)
+		os.Exit(1)
+	}
 }
