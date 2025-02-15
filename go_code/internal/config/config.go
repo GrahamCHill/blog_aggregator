@@ -15,11 +15,33 @@ type Config struct {
 }
 
 func Read() (*Config, error) {
-	// Example: Read from a JSON file or environment variables
-	cfg := &Config{
-		DbUrl: "postgres://grahamhill:@localhost:5432/gator?sslmode=disable",
+	// Get the path to the config file
+	configPath, err := getConfigFilePath()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get config path: %w", err)
 	}
-	return cfg, nil
+
+	// Check if the config file exists
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		// If the file doesn't exist, return a default config
+		return &Config{
+			DbUrl: "postgres://grahamhill:@localhost:5432/gator?sslmode=disable",
+		}, nil
+	}
+
+	// Read the config file
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read config file: %w", err)
+	}
+
+	// Parse the JSON into a Config struct
+	var cfg Config
+	if err := json.Unmarshal(data, &cfg); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
+	}
+
+	return &cfg, nil
 }
 
 func getConfigFilePath() (string, error) {
