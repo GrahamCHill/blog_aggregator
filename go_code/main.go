@@ -47,6 +47,7 @@ func main() {
 	}
 	cmds.Register("login", handlers.HandlerLogin)
 	cmds.Register("register", handlers.HandlerRegister)
+	cmds.Register("reset", handlers.HandlerReset)
 
 	// Check for command-line arguments
 	if len(os.Args) < 2 {
