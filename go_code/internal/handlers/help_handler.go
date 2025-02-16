@@ -58,6 +58,10 @@ func init() {
 			Handler:     wrapHandlerWithUser(HandlerFollow),
 			Description: "Returns the feeds followed by current user. Usage: go run . following",
 		},
+		"unfollow": {
+			Handler:     wrapHandlerWithUser(HandlerUnfollow),
+			Description: "Unfollows an RSS feed for current user. Usage: go run . unfollow <url>",
+		},
 	}
 }
 
