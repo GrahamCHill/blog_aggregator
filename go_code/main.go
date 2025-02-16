@@ -7,6 +7,7 @@ import (
 	"github.com/grahamchill/blog_aggregator/internal/config"
 	"github.com/grahamchill/blog_aggregator/internal/database"
 	"github.com/grahamchill/blog_aggregator/internal/handlers"
+	"github.com/grahamchill/blog_aggregator/internal/middleware"
 	_ "github.com/lib/pq"
 	"os"
 )
@@ -52,10 +53,10 @@ func main() {
 	cmds.Register("reset", handlers.HandlerReset)
 	cmds.Register("users", handlers.HandlerGetUsers)
 	cmds.Register("agg", handlers.HandlerAgg)
-	cmds.Register("addfeed", handlers.HandlerAddFeed)
+	cmds.Register("addfeed", middleware.MiddlewareLoggedIn(handlers.HandlerAddFeed))
 	cmds.Register("feeds", handlers.HandlerFeeds)
-	cmds.Register("follow", handlers.HandlerFollow)
-	cmds.Register("following", handlers.HandlerFollowing)
+	cmds.Register("follow", middleware.MiddlewareLoggedIn(handlers.HandlerFollow))
+	cmds.Register("following", middleware.MiddlewareLoggedIn(handlers.HandlerFollowing))
 
 	// Check for command-line arguments
 	if len(os.Args) < 2 {

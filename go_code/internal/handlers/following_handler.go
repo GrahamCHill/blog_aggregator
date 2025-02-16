@@ -4,18 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/grahamchill/blog_aggregator/internal"
+	"github.com/grahamchill/blog_aggregator/internal/database"
 )
 
-func HandlerFollowing(s *internal.State, cmd internal.Command) error {
+func HandlerFollowing(s *internal.State, cmd internal.Command, user database.User) error {
 	// Ensure no additional arguments are provided
 	if len(cmd.Args) > 0 {
 		return fmt.Errorf("usage: go run . following")
-	}
-
-	// Get the current user from the database
-	user, err := s.Db.GetUser(context.Background(), s.Cfg.DbUser)
-	if err != nil {
-		return fmt.Errorf("failed to get current user: %w", err)
 	}
 
 	// Fetch all feed follows for the user

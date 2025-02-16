@@ -8,7 +8,7 @@ import (
     "github.com/grahamchill/blog_aggregator/internal/database"
 )
 
-func HandlerAddFeed(s *internal.State, cmd internal.Command) error {
+func HandlerAddFeed(s *internal.State, cmd internal.Command, user database.User) error {
     // Ensure the correct number of arguments are provided
     if len(cmd.Args) != 2 {
         return fmt.Errorf("usage: go run . addfeed <name> <url>")
@@ -17,11 +17,6 @@ func HandlerAddFeed(s *internal.State, cmd internal.Command) error {
     name := cmd.Args[0]
     url := cmd.Args[1]
 
-    // Get the current user from the database
-    user, err := s.Db.GetUser(context.Background(), s.Cfg.DbUser)
-    if err != nil {
-        return fmt.Errorf("failed to get current user: %w", err)
-    }
     feedID := uuid.New()
 
     // Create the feed

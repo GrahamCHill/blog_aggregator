@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"github.com/grahamchill/blog_aggregator/internal"
+	"github.com/grahamchill/blog_aggregator/internal/database" // Assuming `database.User` is in this package
 )
 
 type HandlerFunc func(*internal.State, internal.Command) error
@@ -26,7 +27,7 @@ func init() {
 			Description: "Register a new user. Usage: go run . register <name>",
 		},
 		"addfeed": {
-			Handler:     HandlerAddFeed,
+			Handler:     wrapHandlerWithUser(HandlerAddFeed),
 			Description: "Add a new feed. Usage: go run . addfeed <name> <url>",
 		},
 		"reset": {
@@ -50,11 +51,11 @@ func init() {
 			Description: "Display all feeds and the user who added them. Usage: go run . feeds",
 		},
 		"follow": {
-			Handler:     HandlerFollow,
+			Handler:     wrapHandlerWithUser(HandlerFollow),
 			Description: "Follows a specific feed. Usage: go run . follow <url>",
 		},
 		"following": {
-			Handler:     HandlerFollow,
+			Handler:     wrapHandlerWithUser(HandlerFollow),
 			Description: "Returns the feeds followed by current user. Usage: go run . following",
 		},
 	}
@@ -66,4 +67,13 @@ func HandlerHelp(_ *internal.State, _ internal.Command) error {
 		fmt.Printf("  %s: %s\n", name, h.Description)
 	}
 	return nil
+}
+
+// Adapter for handlers with an additional `database.User` parameter
+func wrapHandlerWithUser(handler func(*internal.State, internal.Command, database.User) error) HandlerFunc {
+	return func(state *internal.State, cmd internal.Command) error {
+		// Don't need to actually look up user if calling help, and this allows for more modularity of the application
+		user := database.User{} // Placeholder: Fetch or initialize the user as required
+		return handler(state, cmd, user)
+	}
 }
