@@ -53,6 +53,9 @@ func main() {
 	cmds.Register("users", handlers.HandlerGetUsers)
 	cmds.Register("agg", handlers.HandlerAgg)
 	cmds.Register("addfeed", handlers.HandlerAddFeed)
+	cmds.Register("feeds", handlers.HandlerFeeds)
+	cmds.Register("follow", handlers.HandlerFollow)
+	cmds.Register("following", handlers.HandlerFollowing)
 
 	// Check for command-line arguments
 	if len(os.Args) < 2 {

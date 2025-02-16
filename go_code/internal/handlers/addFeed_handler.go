@@ -35,6 +35,15 @@ func HandlerAddFeed(s *internal.State, cmd internal.Command) error {
         return fmt.Errorf("failed to create feed: %w", err)
     }
 
+    // Automatically create a feed follow record
+    _, err = s.Db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
+        UserID: user.ID,
+        FeedID: feed.ID,
+    })
+    if err != nil {
+        return fmt.Errorf("failed to create feed follow: %w", err)
+    }
+
     // Print the new feed record
     fmt.Printf("Feed created successfully:\n")
     fmt.Printf("ID: %s\n", feed.ID)

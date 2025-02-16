@@ -45,10 +45,22 @@ func init() {
 			Handler:     HandlerAgg,
 			Description: "Display aggregated data of xml feed. Usage: go run . agg",
 		},
+		"feeds": {
+			Handler:     HandlerFeeds,
+			Description: "Display all feeds and the user who added them. Usage: go run . feeds",
+		},
+		"follow": {
+			Handler:     HandlerFollow,
+			Description: "Follows a specific feed. Usage: go run . follow <url>",
+		},
+		"following": {
+			Handler:     HandlerFollow,
+			Description: "Returns the feeds followed by current user. Usage: go run . following",
+		},
 	}
 }
 
-func HandlerHelp(s *internal.State, cmd internal.Command) error {
+func HandlerHelp(_ *internal.State, _ internal.Command) error {
 	fmt.Println("Available commands:")
 	for name, h := range handlers {
 		fmt.Printf("  %s: %s\n", name, h.Description)
