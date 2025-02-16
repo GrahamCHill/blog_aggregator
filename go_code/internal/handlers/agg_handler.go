@@ -1,25 +1,33 @@
 package handlers
 
 import (
-	"context"
-	"fmt"
-	"github.com/grahamchill/blog_aggregator/internal"
-	"github.com/grahamchill/blog_aggregator/internal/RSS"
+    "fmt"
+    "github.com/grahamchill/blog_aggregator/internal"
+    "github.com/grahamchill/blog_aggregator/internal/RSS"
+    "time"
 )
 
 func HandlerAgg(s *internal.State, cmd internal.Command) error {
-	// Ensure no additional arguments are provided
-	if len(cmd.Args) > 0 {
-		return fmt.Errorf("usage: go run . agg")
-	}
+    // Ensure one argument is provided
+    if len(cmd.Args) != 1 {
+        return fmt.Errorf("usage: go run . agg <time_between_reqs>")
+    }
 
-	// Fetch the feed
-	feed, err := RSS.FetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
-	if err != nil {
-		return fmt.Errorf("failed to fetch feed: %w", err)
-	}
+    // Parse the time duration
+    timeBetweenRequests, err := time.ParseDuration(cmd.Args[0])
+    if err != nil {
+        return fmt.Errorf("invalid duration: %w", err)
+    }
 
-	// Print the entire struct
-	fmt.Printf("%+v\n", feed)
-	return nil
+    fmt.Printf("Collecting feeds every %s\n", timeBetweenRequests)
+
+    // Create a time ticker
+    ticker := time.NewTicker(timeBetweenRequests)
+    defer ticker.Stop()
+
+    // Run the scrapeFeeds function in a continuous loop
+    for {
+        RSS.ScrapeFeeds(s)
+        <-ticker.C
+    }
 }

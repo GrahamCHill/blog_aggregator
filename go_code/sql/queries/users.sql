@@ -25,11 +25,11 @@ INSERT INTO feeds (id, name, url, user_id)
 VALUES ($1, $2, $3, $4)
     RETURNING * ;
 
+
 -- name: GetFeeds :many
 SELECT feeds.name, feeds.url, users.name AS user_name
 FROM feeds
 JOIN users ON feeds.user_id = users.id;
-
 
 -- name: CreateFeedFollow :one
 WITH inserted_feed_follow AS (
@@ -62,3 +62,14 @@ WHERE feed_follows.user_id = $1;
 DELETE FROM feed_follows f
 WHERE f.user_id = $1
 AND f.feed_id = (SELECT id FROM feeds WHERE url = $2);
+
+-- name: MarkFeedFetched :exec
+UPDATE feeds
+SET last_fetched_at = NOW(), updated_at = NOW()
+WHERE id = $1;
+
+-- name: GetNextFeedToFetch :one
+SELECT id, url
+FROM feeds
+ORDER BY last_fetched_at NULLS FIRST
+    LIMIT 1;
